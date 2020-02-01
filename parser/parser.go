@@ -53,7 +53,7 @@ func parseTokens(tokens []string) {
 		 - continue
 	*/
 
-	tokenQueue := make([]string, 0)
+	// tokenQueue := make([]string, 0)
 	for tokenReader.HasNext() {
 		// token := tokenReader.Peek()
 		// if contains(strings.Split(DELIMITERS, ""), token) > 0 {
