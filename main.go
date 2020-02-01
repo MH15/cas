@@ -14,6 +14,7 @@ func main() {
 	// fmt.Println(n2.Equals(n1))
 	// fmt.Println(n1.Equals(n2))
 	tokens := tokenizer.Tokens("x_1 + 4 = 2/3")
+	tokens = tokenizer.Tokens("omega_1^2 - omega_2^2 = 2*alpha*omega")
 	fmt.Println(tokens)
 	parser.Parse(tokens)
 }

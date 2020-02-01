@@ -1,9 +1,19 @@
 package parser
 
 import (
-	"cas/types"
 	"fmt"
 )
+
+var opa = map[string]struct {
+	prec   int
+	rAssoc bool
+}{
+	"^": {4, true},
+	"*": {3, false},
+	"/": {3, false},
+	"+": {2, false},
+	"-": {2, false},
+}
 
 const DELIMITERS = "+-*/^%()"
 
@@ -33,35 +43,81 @@ func Parse(tokens []string) {
 
 }
 
+func parseInfix(tokens []string) (rpn string, rpn_tokens []string) {
+	var stack []string // holds operators and left parenthesis
+
+	for _, tok := range tokens {
+		switch tok {
+		case "(":
+			stack = append(stack, tok) // push "(" to stack
+		case ")":
+			var op string
+			for {
+				// pop item ("(" or operator) from stack
+				op, stack = stack[len(stack)-1], stack[:len(stack)-1]
+				if op == "(" {
+					break // discard "("
+				}
+				rpn += " " + op // add operator to result
+				rpn_tokens = append(rpn_tokens, op)
+			}
+		default:
+			if o1, isOp := opa[tok]; isOp {
+				// token is an operator
+				for len(stack) > 0 {
+					// consider top item on stack
+					op := stack[len(stack)-1]
+					if o2, isOp := opa[op]; !isOp || o1.prec > o2.prec ||
+						o1.prec == o2.prec && o1.rAssoc {
+						break
+					}
+					// top item is an operator that needs to come off
+					stack = stack[:len(stack)-1] // pop it
+					rpn += " " + op              // add it to result
+					rpn_tokens = append(rpn_tokens, op)
+				}
+				// push operator (the new one) to stack
+				stack = append(stack, tok)
+			} else { // token is an operand
+				if rpn > "" {
+					rpn += " "
+				}
+				rpn += tok // add operand to result
+				rpn_tokens = append(rpn_tokens, tok)
+			}
+		}
+	}
+	// drain stack to result
+	for len(stack) > 0 {
+		rpn += " " + stack[len(stack)-1]
+		rpn_tokens = append(rpn_tokens, stack[len(stack)-1])
+		stack = stack[:len(stack)-1]
+	}
+	return rpn, rpn_tokens
+}
+
 func parseTokens(tokens []string) {
-	e := types.Expression{
-		Left:  nil,
-		Op:    types.PLUS,
-		Right: nil,
-	}
+	rpn, stack := parseInfix(tokens)
+	fmt.Println(rpn)
+	fmt.Println(stack)
+	// e := types.Expression{
+	// 	Left:  nil,
+	// 	Op:    types.PLUS,
+	// 	Right: nil,
+	// }
 
-	tokenReader := Tokens{tokens, 0}
+	// tokenReader := Tokens{tokens, 0}
 
-	fmt.Println(e)
-	fmt.Println(tokenReader.Peek())
+	// fmt.Println(e)
+	// fmt.Println(tokenReader.Peek())
 
-	/*
-		Algorithm:
-		 - read until operator found
-		 - recurse on stuff to left of operator
-		 - consume said operator
-		 - continue
-	*/
-
-	// tokenQueue := make([]string, 0)
-	for tokenReader.HasNext() {
-		// token := tokenReader.Peek()
-		// if contains(strings.Split(DELIMITERS, ""), token) > 0 {
-		// 	// this is an operator, recurse on stuff prior to this
-		// } else {
-		// 	tokenQueue = append(tokenQueue, token)
-		// }
-	}
+	// /*
+	// 	Algorithm:
+	// 	 - read until operator found
+	// 	 - recurse on stuff to left of operator
+	// 	 - consume said operator
+	// 	 - continue
+	// */
 
 }
 
