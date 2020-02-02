@@ -1,7 +1,11 @@
 package parser
 
 import (
+	"cas/types"
 	"fmt"
+	"strings"
+
+	"github.com/davecgh/go-spew/spew"
 )
 
 var opa = map[string]struct {
@@ -97,28 +101,115 @@ func parseInfix(tokens []string) (rpn string, rpn_tokens []string) {
 }
 
 func parseTokens(tokens []string) {
-	rpn, stack := parseInfix(tokens)
-	fmt.Println(rpn)
+	_, stack := parseInfix(tokens)
+	// fmt.Println(rpn)
 	fmt.Println(stack)
-	// e := types.Expression{
-	// 	Left:  nil,
-	// 	Op:    types.PLUS,
-	// 	Right: nil,
-	// }
 
-	// tokenReader := Tokens{tokens, 0}
+	// root := types.BinaryTree{}
 
-	// fmt.Println(e)
-	// fmt.Println(tokenReader.Peek())
+	tree := assembleTree(stack)
+	// fmt.Println(tree)
+	spew.Dump(tree)
 
-	// /*
-	// 	Algorithm:
-	// 	 - read until operator found
-	// 	 - recurse on stuff to left of operator
-	// 	 - consume said operator
-	// 	 - continue
-	// */
+}
 
+func assembleTree(tokens []string) types.BinaryNode {
+	var stack []types.BinaryNode
+	for _, token := range tokens {
+		if isOperator(token) {
+			left := stack[len(stack)-1] // pop last from stack
+			stack = stack[:len(stack)-1]
+			right := stack[len(stack)-1] // pop another from stack
+			stack = stack[:len(stack)-1]
+
+			node := types.BinaryNode{
+				Left:  &left,
+				Data:  token,
+				Right: &right,
+			}
+			stack = append(stack, node) // push to stack
+		} else {
+			// psuh to stack
+			stack = append(stack, types.BinaryNode{Data: token})
+		}
+	}
+	fmt.Println("len: ", len(stack))
+	return stack[0]
+}
+
+func isOperator(token string) bool {
+	return strings.Contains("+-*/^%", token)
+
+}
+
+func assembleTree1(tokens []string) types.BinaryNode {
+	l := len(tokens)
+	if l > 2 {
+		// split into left, right and operator
+		data := tokens[l-1]
+		right := tokens[l-2]
+		left := tokens[0 : l-2]
+		fmt.Println("data: ", data)
+		// fmt.Println("right: ", right)
+		// fmt.Println("left: ", left)
+
+		// recurse
+		leftTree := assembleTree(left)
+
+		rightTree := types.BinaryNode{
+			Left:  nil,
+			Data:  right,
+			Right: nil,
+		}
+
+		// assemble tree with result from recursion
+		node := types.BinaryNode{
+			Left:  &leftTree,
+			Data:  data,
+			Right: &rightTree,
+		}
+		return node
+	} else {
+		return types.BinaryNode{}
+	}
+}
+
+func height(root *types.BinaryNode) int {
+	if root == nil {
+		return 0
+	} else {
+		// compute the height of each subtree
+		lheight := height(root.Left)
+		rheight := height(root.Right)
+
+		// use the larger one
+		if lheight > rheight {
+			return lheight + 1
+		} else {
+			return rheight + 1
+		}
+	}
+}
+
+func printTree(root *types.BinaryNode, indent int) {
+	h := height(root)
+	for i := 1; i <= h; i++ {
+		fmt.Println("call")
+		printGivenLevel(root, i)
+	}
+}
+
+func printGivenLevel(root *types.BinaryNode, level int) {
+	if *root == (types.BinaryNode{}) {
+		return
+	}
+	if level == 1 {
+		fmt.Printf("%s \n", root.Data)
+	} else if level > 1 {
+		printGivenLevel(root.Left, level-1)
+		printGivenLevel(root.Right, level-1)
+		fmt.Println()
+	}
 }
 
 func contains(slice []string, str string) int {
