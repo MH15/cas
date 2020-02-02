@@ -20,6 +20,25 @@ type BinaryNode struct {
 	Right *BinaryNode
 }
 
-type BinaryTree struct {
-	root *BinaryNode
+func (n *BinaryNode) ToString() string {
+	var left, data, right string
+	if n.Left != nil {
+		left = n.Left.ToString()
+	} else {
+		left = ""
+	}
+	if n.Data != "" {
+		data = n.Data
+	} else {
+		data = ""
+	}
+
+	if n.Right != nil {
+		right = n.Right.ToString()
+	} else {
+		right = ""
+	}
+
+	s := left + data + right
+	return s
 }

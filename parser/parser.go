@@ -21,30 +21,32 @@ var opa = map[string]struct {
 
 const DELIMITERS = "+-*/^%()"
 
-func Parse(tokens []string) {
-	countEquals := occurances(tokens, "=")
-	if countEquals > 1 {
-		panic("Expressions may not have more than one equal sign.")
-	}
+func ParseEquation(tokens []string) (types.BinaryNode, types.BinaryNode) {
+	// Analyze equality
+	index := Contains(tokens, "=")
+	fmt.Println(index)
+	fmt.Println(tokens[index])
 
-	if countEquals == 1 {
-		// Analyze equality
-		index := contains(tokens, "=")
-		fmt.Println(index)
-		fmt.Println(tokens[index])
+	left := tokens[0:index]
+	right := tokens[index+1 : len(tokens)]
+	// fmt.Println("\n----- LEFT -----")
+	leftTree := ParseExpression(left)
+	// fmt.Println("\n----- RIGHT -----")
+	rightTree := ParseExpression(right)
 
-		left := tokens[0:index]
-		right := tokens[index+1 : len(tokens)]
-		fmt.Println(left, right)
-		fmt.Println("\n----- LEFT -----")
-		parseTokens(left)
-		fmt.Println("\n----- RIGHT -----")
-		parseTokens(right)
+	return leftTree, rightTree
+}
 
-	} else {
-		fmt.Println("expression not equation")
-	}
+func ParseExpression(tokens []string) types.BinaryNode {
+	_, stack := parseInfix(tokens)
+	// fmt.Println(rpn)
+	fmt.Println(stack)
 
+	tree := assembleTree(stack)
+	// fmt.Println(tree)
+	spew.Dump(tree)
+
+	return tree
 }
 
 func parseInfix(tokens []string) (rpn string, rpn_tokens []string) {
@@ -100,26 +102,13 @@ func parseInfix(tokens []string) (rpn string, rpn_tokens []string) {
 	return rpn, rpn_tokens
 }
 
-func parseTokens(tokens []string) {
-	_, stack := parseInfix(tokens)
-	// fmt.Println(rpn)
-	fmt.Println(stack)
-
-	// root := types.BinaryTree{}
-
-	tree := assembleTree(stack)
-	// fmt.Println(tree)
-	spew.Dump(tree)
-
-}
-
 func assembleTree(tokens []string) types.BinaryNode {
 	var stack []types.BinaryNode
 	for _, token := range tokens {
 		if isOperator(token) {
-			left := stack[len(stack)-1] // pop last from stack
+			right := stack[len(stack)-1] // pop last from stack
 			stack = stack[:len(stack)-1]
-			right := stack[len(stack)-1] // pop another from stack
+			left := stack[len(stack)-1] // pop another from stack
 			stack = stack[:len(stack)-1]
 
 			node := types.BinaryNode{
@@ -212,7 +201,8 @@ func printGivenLevel(root *types.BinaryNode, level int) {
 	}
 }
 
-func contains(slice []string, str string) int {
+// TODO: combine these functions
+func Contains(slice []string, str string) int {
 	for i, a := range slice {
 		if a == str {
 			return i
@@ -221,7 +211,7 @@ func contains(slice []string, str string) int {
 	return -1
 }
 
-func occurances(slice []string, str string) int {
+func Occurances(slice []string, str string) int {
 	count := 0
 	for _, a := range slice {
 		if a == str {

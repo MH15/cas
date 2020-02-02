@@ -1,9 +1,10 @@
 package main
 
 import (
-	"cas/parser"
-	"cas/tokenizer"
+	"cas/expression"
 	"fmt"
+
+	"github.com/davecgh/go-spew/spew"
 )
 
 func main() {
@@ -13,9 +14,13 @@ func main() {
 	// fmt.Println(n2)
 	// fmt.Println(n2.Equals(n1))
 	// fmt.Println(n1.Equals(n2))
-	tokens := tokenizer.Tokens("x_1 + 4 = 2/3")
-	tokens = tokenizer.Tokens("a+b*c = 2+6")
-	tokens = tokenizer.Tokens("w_1^2 - w_2^2 = 2*alpha*omega")
-	fmt.Println(tokens)
-	parser.Parse(tokens)
+
+	equation := expression.NewEquation("4=x/7")
+	equation = expression.NewEquation("(2*x+3)/4=(x+7)/3")
+	fmt.Println("--- DUMP ---")
+	spew.Dump(equation)
+
+	fmt.Println("--- RECONSTRUCTION ---")
+	fmt.Println(equation.ToString())
+
 }
