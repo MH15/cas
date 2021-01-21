@@ -15,12 +15,18 @@ func main() {
 	// fmt.Println(n2.Equals(n1))
 	// fmt.Println(n1.Equals(n2))
 
-	equation := expression.NewEquation("4=x/7")
-	equation = expression.NewEquation("(2*x+3)/4=(x+7)/3")
+	// equation := expression.NewEquation("4=x/7")
+	// equation = expression.NewEquation("(2*x+3)/4=(x+7)/3")
+	// spew.Dump(equation)
+
 	fmt.Println("--- DUMP ---")
-	spew.Dump(equation)
+	eq := expression.NewExpression("(a*4+5^7)/73")
+
+	spew.Dump(eq)
 
 	fmt.Println("--- RECONSTRUCTION ---")
-	fmt.Println(equation.ToString())
+	fmt.Println(eq.ToString())
+
+	// fmt.Println(equation.ToString())
 
 }
